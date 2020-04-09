@@ -93,9 +93,9 @@ def parse_network_layer_packet(ip_packet: bytes) -> IpPacket:
 def setup_sockets():
     TCP = 0x06
     stealer = socket.socket(socket.AF_INET, socket.SOCK_RAW, TCP)
-    #iface_name = "lo"
-    #stealer.setsockopt(socket.SOL_SOCKET,
-    #                   socket.SO_BINDTODEVICE, bytes(iface_name, "ASCII"))
+    iface_name = "lo"
+    stealer.setsockopt(socket.SOL_SOCKET,
+                      socket.SO_BINDTODEVICE, bytes(iface_name, "ASCII"))
 
     return stealer
 
@@ -105,7 +105,7 @@ def print_packet(tcp_payload: bytes):
         decoded_payload = tcp_payload.decode("utf-8")
         print("Data: ", decoded_payload)
     except:
-        print("None")
+        print("None - Data is not utf-8 decodable")
 
 
 def main():
@@ -118,8 +118,8 @@ def main():
         raw_data, address = stealer.recvfrom(4096)
         ip_packet = parse_network_layer_packet(raw_data)
         tcp_packet = parse_application_layer_packet(ip_packet.get_payload())
+        #print("Encoded Data: ", tcp_packet.get_payload())
         print_packet(tcp_packet.get_payload())
-        pass
     pass
 
 
