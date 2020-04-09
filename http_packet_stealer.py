@@ -118,7 +118,7 @@ def main():
         raw_data, address = stealer.recvfrom(4096)
         ip_packet = parse_network_layer_packet(raw_data)
         tcp_packet = parse_application_layer_packet(ip_packet.get_payload())
-        # print("Encoded Data: ", tcp_packet.get_payload())
+        # print("Encoded Data:", tcp_packet.get_payload())
         print_packet(tcp_packet.get_payload())
     pass
 
