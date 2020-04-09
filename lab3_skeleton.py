@@ -31,7 +31,13 @@ class TcpPacket(object):
 def parse_raw_ip_addr(raw_ip_addr: bytes) -> str:
     # Converts a byte-array IP address to a string
     # the input is on the form b'\xaa\xab'... a byte array
-    return "0.0.0.0"
+    unpacked_ip = struct.unpack("!BBBB", raw_ip_addr)
+    ip_as_string = ""
+    for i in range (0, len(unpacked_ip) - 1):
+        ip_as_string += str(unpacked_ip[i]) + "."
+
+    ip_as_string += str(unpacked_ip[i + 1])
+    return ip_as_string
 
 
 def parse_application_layer_packet(ip_packet_payload: bytes) -> TcpPacket:
