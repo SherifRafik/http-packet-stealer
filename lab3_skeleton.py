@@ -1,6 +1,5 @@
 import socket
 import struct
-import binascii
 
 
 class IpPacket(object):
@@ -48,7 +47,18 @@ def parse_raw_ip_addr(raw_ip_addr: bytes) -> str:
 def parse_application_layer_packet(ip_packet_payload: bytes) -> TcpPacket:
     # Parses raw bytes of a TCP packet
     # That's a byte literal (~byte array) check resources section
-    return TcpPacket(-1, -1, -1, b'')
+    # Source port occupies the first 2 byte
+    source_port = struct.unpack("!H", ip_packet_payload[0:2])[0]
+    # Destination port occupies the first 2 byte
+    destination_port = struct.unpack("!H", ip_packet_payload[2:4])[0]
+    # Data offset and reserved flags occupie the first byte in the 4th row
+    data_offset_and_reserved_flags = struct.unpack("!B",ip_packet_payload[12:13])[0]
+    # Shift right by 4 to extract the data offset
+    data_offset = data_offset_and_reserved_flags >> 4
+    # Multiply  by 4 because it represent 32 bit words
+    payload = ip_packet_payload[data_offset * 4:]
+
+    return TcpPacket(source_port, destination_port, data_offset, payload)
 
 
 def parse_network_layer_packet(ip_packet: bytes) -> IpPacket:
@@ -57,8 +67,8 @@ def parse_network_layer_packet(ip_packet: bytes) -> IpPacket:
 
     # First byte : Version(4 bits) + IHL(4 bits)
     version_and_ihl = ip_packet[0]
-    # Extract the ihl by anding with 0f, time 4 because ihl is the length in 32 bit words
-    internet_header_length = (version_and_ihl & 0x0f)
+    # Extract the ihl by anding with 0f, Multiply 4 because ihl is the length in 32 bit words
+    internet_header_length = version_and_ihl & 0x0f
     # Nineth byte : Protocol (8 bits)
     protocol = ip_packet[9]
 
@@ -70,7 +80,6 @@ def parse_network_layer_packet(ip_packet: bytes) -> IpPacket:
     destination_address = ip_packet[16:20]
     # Convert the address into a readable format
     destination_address = parse_raw_ip_addr(destination_address)
-    print(source_address, destination_address)
     payload = ip_packet[internet_header_length * 4:]
 
     return IpPacket(protocol, internet_header_length, source_address, destination_address, payload)
@@ -94,7 +103,6 @@ def main():
     while True:
         # Receive packets and do processing
         raw_data, address = stealer.recvfrom(4096)
-        print(binascii.hexlify(raw_data))
         ip_packet = parse_network_layer_packet(raw_data)
         tcp_packet = parse_application_layer_packet(ip_packet.get_payload())
         pass
