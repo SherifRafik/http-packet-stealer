@@ -44,7 +44,7 @@ def parse_raw_ip_addr(raw_ip_addr: bytes) -> str:
     # Convert every element in the tuple into a string using map
     ip_map = map(str, unpacked_ip)
     # Join all the strings in this map on .
-    ip_as_string = ".".join(ip_map)
+    ip_as_string = ".".join((ip_map))
     return ip_as_string
 
 
@@ -95,7 +95,7 @@ def setup_sockets():
     stealer = socket.socket(socket.AF_INET, socket.SOCK_RAW, TCP)
     iface_name = "lo"
     stealer.setsockopt(socket.SOL_SOCKET,
-                       socket.SO_BINDTODEVICE, bytes(iface_name, "ASCII"))
+                      socket.SO_BINDTODEVICE, bytes(iface_name, "ASCII"))
 
     return stealer
 
@@ -118,7 +118,7 @@ def main():
         raw_data, address = stealer.recvfrom(4096)
         ip_packet = parse_network_layer_packet(raw_data)
         tcp_packet = parse_application_layer_packet(ip_packet.get_payload())
-        # print("Encoded Data: ", tcp_packet.get_payload())
+        #print("Encoded Data: ", tcp_packet.get_payload())
         print_packet(tcp_packet.get_payload())
     pass
 
