@@ -31,6 +31,10 @@ class TcpPacket(object):
         self.data_offset = data_offset
         self.payload = payload
 
+    # Getter for payload
+    def get_payload(self):
+        return self.payload
+
 
 def parse_raw_ip_addr(raw_ip_addr: bytes) -> str:
     # Converts a byte-array IP address to a string
@@ -52,7 +56,8 @@ def parse_application_layer_packet(ip_packet_payload: bytes) -> TcpPacket:
     # Destination port occupies the first 2 byte
     destination_port = struct.unpack("!H", ip_packet_payload[2:4])[0]
     # Data offset and reserved flags occupie the first byte in the 4th row
-    data_offset_and_reserved_flags = struct.unpack("!B",ip_packet_payload[12:13])[0]
+    data_offset_and_reserved_flags = struct.unpack(
+        "!B", ip_packet_payload[12:13])[0]
     # Shift right by 4 to extract the data offset
     data_offset = data_offset_and_reserved_flags >> 4
     # Multiply  by 4 because it represent 32 bit words
@@ -88,11 +93,19 @@ def parse_network_layer_packet(ip_packet: bytes) -> IpPacket:
 def setup_sockets():
     TCP = 0x06
     stealer = socket.socket(socket.AF_INET, socket.SOCK_RAW, TCP)
-    iface_name = "lo"
-    stealer.setsockopt(socket.SOL_SOCKET,
-                       socket.SO_BINDTODEVICE, bytes(iface_name, "ASCII"))
+    #iface_name = "lo"
+    #stealer.setsockopt(socket.SOL_SOCKET,
+    #                   socket.SO_BINDTODEVICE, bytes(iface_name, "ASCII"))
 
     return stealer
+
+
+def print_packet(tcp_payload: bytes):
+    try:
+        decoded_payload = tcp_payload.decode("utf-8")
+        print("Data: ", decoded_payload)
+    except:
+        print("None")
 
 
 def main():
@@ -105,6 +118,7 @@ def main():
         raw_data, address = stealer.recvfrom(4096)
         ip_packet = parse_network_layer_packet(raw_data)
         tcp_packet = parse_application_layer_packet(ip_packet.get_payload())
+        print_packet(tcp_packet.get_payload())
         pass
     pass
 
