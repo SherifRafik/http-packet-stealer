@@ -32,11 +32,11 @@ def parse_raw_ip_addr(raw_ip_addr: bytes) -> str:
     # Converts a byte-array IP address to a string
     # the input is on the form b'\xaa\xab'... a byte array
     unpacked_ip = struct.unpack("!BBBB", raw_ip_addr)
-    ip_as_string = ""
-    for i in range (0, len(unpacked_ip) - 1):
-        ip_as_string += str(unpacked_ip[i]) + "."
-
-    ip_as_string += str(unpacked_ip[i + 1])
+    # map(function, iterable(tuple))
+    # Convert every element in the tuple into a string using map
+    ip_map = map(str, unpacked_ip)
+    # Join all the strings in this map on .
+    ip_as_string = ".".join((ip_map))
     return ip_as_string
 
 
