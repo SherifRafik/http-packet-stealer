@@ -1,3 +1,7 @@
+import socket
+import struct
+
+
 class IpPacket(object):
     """
     Represents the *required* data to be extracted from an IP packet.
@@ -42,6 +46,12 @@ def parse_network_layer_packet(ip_packet: bytes) -> IpPacket:
     return IpPacket(-1, -1, "0.0.0.0", "0.0.0.0", b'')
 
 
+def setup_sockets():
+    TCP = 0x0006
+    stealer = socket.socket(socket.AF_INET, socket.SOCK_RAW, TCP)
+    return stealer
+
+
 def main():
     # Un-comment this line if you're getting too much noisy traffic.
     # to bind to an interface on your PC. (or you can simply disconnect from the internet)
@@ -49,8 +59,10 @@ def main():
     # iface_name = "lo"
     # stealer.setsockopt(socket.SOL_SOCKET,
     #                    socket.SO_BINDTODEVICE, bytes(iface_name, "ASCII"))
+    stealer = setup_sockets()
     while True:
-        # Receive packets and do processing here
+        # Receive packets and do processing
+        raw_data, address = stealer.recvfrom(4096)
         pass
     pass
 
