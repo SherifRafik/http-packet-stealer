@@ -111,7 +111,7 @@ def main():
     # Just to prove that they're equivalent.
     assert pbl == pbr
     test_parse_ip_addr()
-    #test_ip_packet_parsing()
+    test_ip_packet_parsing()
     #test_tcp_data_packet()
 
 
